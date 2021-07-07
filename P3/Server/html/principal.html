@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="es" xml:lang="es">
+  <head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" type="text/css" href="../css/principal.css">
+    <link rel="icon" type="image/x-icon" href="../icon/favicon.ico" />
+
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Noto+Serif:wght@700&family=Roboto:wght@300&display=swap');
+      @import url('https://fonts.googleapis.com/css2?family=Noto+Serif:wght@700&display=swap');
+    </style>
+  </head>
+
+  <body>
+    <header>
+      <div id="cabecera">
+        <span id="title">La ruleta de las palabras</span>
+      </div>
+		</header>
+
+    <div id="info">
+      <form action="javascript:void(0);" onsubmit="javascript:enviar();">
+        <input type="text" name="user" id="user" value ="" placeholder="Usuario">
+        <input type="submit" class="boton" value="Buscar">
+      </form>
+      <div id="campoVacio"></div>
+    </div>
+
+    <section id="datos">
+      <div id="marco">
+        <div class="estiloDatos">
+          <div id="nombreUsuario"></div>
+          <div id="ruletasFinalizadas"></div>
+          <div id="totalAciertos"></div>
+          <div id="totalSinResponder"></div>
+          <div id="totalErrores"></div>
+        </div>
+      </div>
+    </section>
+  </body>
+
+  <script src="/socket.io/socket.io.js"></script>
+
+  <script type="text/javascript">
+    function enviar(){
+
+        var user = document.getElementById("user").value;
+
+        var serviceURL = document.URL;
+
+        var socket = io.connect(serviceURL);
+
+        socket.on('obtener', function(data) {
+    			actualizarVista(data);
+    		});
+
+        if(comprobarCampo()){
+          socket.emit('usuario', user, function(algo){
+          });
+        }
+    }
+
+    function actualizarVista(datos){
+
+      if(comprobarCampo()){
+        var ruletasFinalizadas = document.getElementById("ruletasFinalizadas");
+        var totalAciertos = document.getElementById("totalAciertos");
+        var totalSinResponder = document.getElementById("totalSinResponder");
+        var totalErrores = document.getElementById("totalErrores");
+        var usuario = document.getElementById("nombreUsuario");
+        var cuadro = document.getElementById("marco");
+        var mensajeRuletasFinalizadas = "Ruletas finalizadas: ";
+        var mensajeTotalAciertos = "Totales acertadas: ";
+        var mensajeTotalSinResponder = "Totales sin responder: ";
+        var mensajeTotalErrores = "Totales incorrectas: ";
+        var mensajeNombreUsuario = "Usuario: ";
+
+        console.log(datos);
+
+        if(datos[0] == null){
+          document.getElementById("campoVacio").innerHTML = "El usuario no existe";
+        } else {
+          ruletasFinalizadas.innerHTML = mensajeRuletasFinalizadas.concat(datos[0].ruletasFinalizadas);
+          totalAciertos.innerHTML = mensajeTotalAciertos.concat(datos[0].totalAciertos);
+          totalSinResponder.innerHTML = mensajeTotalSinResponder.concat(datos[0].totalSinResponder);
+          totalErrores.innerHTML = mensajeTotalErrores.concat(datos[0].totalErrores);
+          usuario.innerHTML = mensajeNombreUsuario.concat(datos[0].usuario);
+          marco.style.border = "solid";
+          marco.style.background = "#8ff6ba";
+          marco.style.borderColor = "#008537";
+          document.getElementById("campoVacio").innerHTML = "";
+        }
+      }
+    }
+
+    function comprobarCampo(){
+      var relleno = true;
+      var user = document.getElementById("user").value;
+
+      if(user == ""){
+        relleno = false;
+        document.getElementById("campoVacio").innerHTML = "Escriba un usuario";
+      }
+
+      return relleno;
+    }
+
+  </script>
+</html>
